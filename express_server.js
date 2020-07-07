@@ -22,32 +22,54 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// all urls are displayed on the main page
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+// new url is created
 app.get("/urls/new", (rew, res) => {
   res.render("urls_new");
 });
 
+// new page is shown
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[req.params.shortURL];
-  let templateVars = { shortURL: shortURL, longURL: longURL };
-  res.render("urls_show", templateVars);
+  if (verifyShortUrl(shortURL)) {
+    let longURL = urlDatabase[req.params.shortURL];
+    let templateVars = { shortURL: shortURL, longURL: longURL };
+    res.render("urls_show", templateVars);
+  } else {
+    res.send('does not exist');
+  }
 });
 
+// new url is added to be shown with all urls
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortURL = generateShortURL();
+  const newURL = req.body.longURL;
+  urlDatabase[shortURL] = newURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
+// redirect to longRIL
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  if (verifyShortUrl(shortURL)) {
+    const longURL = urlDatabase[shortURL];
+    res.redirect(longURL);
+  } else {
+    res.status(404);
+    res.send('Does not exist');
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function generateRandomString() {
+const generateRandomString = () => {
   const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
   const upperCase = lowerCase.toUpperCase();
   const numeric = '1234567890';
@@ -60,12 +82,19 @@ function generateRandomString() {
     }
   }
   return alphaNumeric[index];
-}
+};
 
+// this will generate a unique url, string random alphaNumeric values
+// index is betwen 0 and 61 as 62 is our alphaNumeric
 const generateShortURL = () => {
   let randomString = '';
   while (randomString.length < 6) {
     randomString += generateRandomString();
   }
   return randomString;
-}
+};
+
+//this will show if short url exists
+const verifyShortUrl = URL => {
+  return urlDatabase[URL];
+};
