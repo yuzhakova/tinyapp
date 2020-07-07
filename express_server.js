@@ -29,7 +29,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[req.params.shortURL];
   let templateVars = { shortURL: shortURL, longURL: longURL };
-  res.render("urls_index", templateVars);
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
