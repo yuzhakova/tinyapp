@@ -16,6 +16,8 @@
   "bugs": {
     "url": "https://github.com/yuzhakova/tinyapp/issues"
   },
-  "homepage": "https://github.com/yuzhakova/tinyapp#readme"
+  "homepage": "https://github.com/yuzhakova/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
-
