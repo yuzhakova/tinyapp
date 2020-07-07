@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -36,6 +38,34 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+function generateRandomString() {
+  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+  const upperCase = lowerCase.toUpperCase();
+  const numeric = '1234567890';
+  const alphaNumeric = lowerCase + upperCase + numeric;
+  //alphaNumeric is 62
+  let index = Math.round(Math.random() * 100);
+  if (index > 61) {
+    while (index > 61) {
+      index = Math.round(Math.random() * 100);
+    }
+  }
+  return alphaNumeric[index];
+}
+
+const generateShortURL = () => {
+  let randomString = '';
+  while (randomString.length < 6) {
+    randomString += generateRandomString();
+  }
+  return randomString;
+}
