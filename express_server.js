@@ -65,6 +65,14 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+//this is to handle post requests on the server (delete url)
+//post route that removes a url resource: POST
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const urlToDelete = req.params.shortURL;
+  delete urlDatabase[urlToDelete];
+  res.redirect('/urls');
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
