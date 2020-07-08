@@ -1,11 +1,13 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookie = require('cookie-parser')
+const cookie = require('cookie-parser');
+const morgan = require('morgan');
 app.use(bodyParser.urlencoded({extended: true}));
-app.set("view engine", "ejs");
+app.set('view engine', "ejs");
 app.use(cookie());
+app.use(morgan('dev'));
 
 
 const urlDatabase = {
@@ -99,6 +101,12 @@ app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
+
+app.get("/register", (req, res) => {
+  templateVars = { username:req.cookies['username']}
+  res.render("urls_register", templateVars);
+  res.redirect('/urls');
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
