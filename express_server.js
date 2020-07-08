@@ -53,7 +53,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// redirect to longRIL
+// redirect to longURL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (verifyShortUrl(shortURL)) {
@@ -73,10 +73,20 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
+//this is to edit
+app.post("/urls/:shortURL/edit", (req, res) => {
+  const key = req.params.shortURL;
+  urlDatabase[key] = req.body.longURL;
+  res.redirect('/urls')
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+//These are helper functions
+// this will generate a unique url, string random alphaNumeric values
+// index is betwen 0 and 61 as 62 is our alphaNumeric
 const generateRandomString = () => {
   const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
   const upperCase = lowerCase.toUpperCase();
@@ -92,8 +102,6 @@ const generateRandomString = () => {
   return alphaNumeric[index];
 };
 
-// this will generate a unique url, string random alphaNumeric values
-// index is betwen 0 and 61 as 62 is our alphaNumeric
 const generateShortURL = () => {
   let randomString = '';
   while (randomString.length < 6) {
