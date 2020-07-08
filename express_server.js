@@ -2,8 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const cookie = require('cookie-parser')
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
+app.use(cookie());
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -24,13 +27,14 @@ app.get("/hello", (req, res) => {
 
 // all urls are displayed on the main page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   res.render("urls_index", templateVars);
 });
 
 // new url is created
-app.get("/urls/new", (rew, res) => {
-  res.render("urls_new");
+app.get("/urls/new", (req, res) => {
+  let templateVars = { username: req.cookies['username']}
+  res.render("urls_new", templateVars);
 });
 
 // new page is shown
@@ -38,7 +42,8 @@ app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   if (verifyShortUrl(shortURL)) {
     let longURL = urlDatabase[req.params.shortURL];
-    let templateVars = { shortURL: shortURL, longURL: longURL };
+    let templateVars = { shortURL: shortURL, longURL: longURL, username: req.cookies['username']
+};
     res.render("urls_show", templateVars);
   } else {
     res.send('does not exist');
@@ -78,6 +83,21 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   const key = req.params.shortURL;
   urlDatabase[key] = req.body.longURL;
   res.redirect('/urls')
+});
+
+// endpoint to login
+app.post("/login", (req, res) => {
+  if (req.body.username) {
+    const username = req.body.username;
+    res.cookie('username', username);
+  }
+  res.redirect('/urls');
+});
+
+// endpoint to logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
