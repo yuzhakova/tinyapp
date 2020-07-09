@@ -4,31 +4,27 @@ const PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookie = require('cookie-parser');
 const morgan = require('morgan');
-const bcrypt = require('bcrypt');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', "ejs");
 app.use(cookie());
 app.use(morgan('dev'));
 
-const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner} = require('./helperFunctions');
+const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser} = require('./helperFunctions');
 
 const urlDatabase = {
-  // "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "nat123"},
-  // "9sm5xK": {longURL: "http://www.google.com", userID: "nat123"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "nat123"},
+  "9sm5xK": {longURL: "http://www.google.com", userID: "nat123"
 }
 
 //store user as key object
 const userDatabase = {
-  // 'abcd': { id: 'abcd', "email-address": 'john@stamos.com', password: '1234' }
-};
+  "nat123": {id: "nat123", "email-address": "natalia.yuzhakova@com", password: "nat123"},
+}
 
 app.get("/", (req, res) => {
-  const current_user = currentUser(req.cookies['user_id'], userDatabase);
-  if (!current_user) {
-    res.redirect("/login");
-  }
-  res.redirect("/urls");
-});
+  res.send("Hello!");
+})
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -46,7 +42,6 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const {password} = req.body;
-  const hashedPwd = bcrypt.hashSync(password, 10)
   const email = req.body['email-address']
   if (email === '') {
     res.status(400).send('Email is required');
@@ -55,7 +50,6 @@ app.post("/register", (req, res) => {
   } else if (!checkIfAvail(email, userDatabase)) {
     res.status(400).send('This email is already registered');
   } else {
-    req.body['password'] = hashedPwd;
   const newUser = addUser(req.body, userDatabase)
   res.cookie('user_id', newUser.id)
   res.redirect('/urls');
@@ -63,18 +57,17 @@ app.post("/register", (req, res) => {
 })
 
 app.get("/login", (req, res) => {
-  templateVars = { current_user: currentUser(req.cookies['user_id'], userDatabase)};
+  templateVars = { current_user: currentUser(req.cookies['user_id'], userDatabase) }
   res.render("login", templateVars);
 });
 
-//Create helper function to verify that the email and pwd match database
 app.post("/login", (req, res) => {
   const emailUsed = req.body['email-address'];
   const pwdUsed = req.body['password'];
   if (fetchUserInfo(emailUsed, userDatabase)) {
     const password = fetchUserInfo(emailUsed, userDatabase).password;
     const id = fetchUserInfo(emailUsed, userDatabase).id;
-    if (!bcrypt.compareSync(pwdUsed, password)) {
+    if (password !== pwdUsed) {
       res.status(403).send('Error 403... re-enter your password')
     } else {
       res.cookie('user_id', id);
@@ -140,16 +133,19 @@ app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[shortURL].longURL;
     res.redirect(longURL);
   } else {
-    res.status(404).send('Does not exist');
+    res.status(404);
+    res.send('Does not exist');
   }
 });
 
 //this is to delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (!checkOwner(currentUser(req.cookies['user_id'], userDatabase), req.params.shortURL, urlDatabase)) {
-    res.send('This id does not belong to you')
+  const current_user = currentUser(req.cookies['user_id'], userDatabase);
+  const shortURL = req.params.shortURL;
+  if (current_user !== urlDatabase[shortURL].userID) {
+    res.send('This id does not belong to you');
   }
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
@@ -162,7 +158,10 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect('/urls')
 });
 
-
+const checkOwner = (userId, urlID, database) => {
+  console.log('this is shortURL', urlID)
+  return userId === database[urlID].userID
+}
 
 // endpoint to logout
 app.post("/logout", (req, res) => {

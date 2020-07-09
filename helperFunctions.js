@@ -65,6 +65,7 @@ const currentUser = (cookie, database) => {
   }
 };
 
+//this is to return url where the userID is equal to the id of current user
 const urlsForUser = (id, database) => {
   let currentUserId = id;
   let usersURLs = {};
@@ -76,5 +77,8 @@ const urlsForUser = (id, database) => {
   return usersURLs;
 };
 
+const checkOwner = (userId, urlID, database) => {
+  return userId === database[urlID].userID
+}
 
-module.exports = { verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser };
+module.exports = {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner};
