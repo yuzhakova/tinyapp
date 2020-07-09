@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 //These are helper functions
 //this will show if short url exists
 const verifyShortUrl = (URL, database) => {
@@ -30,11 +32,10 @@ const randomString = () => {
   return randomString;
 };
 
-
 //helpfer function: to check if emails are registered
 const checkIfAvail = (newVal, database) => {
   for (let user in database) {
-    if (database[user]['email-address'] === newVal) {
+    if (database[user].email === newVal) {
       return false;
     }
   }
@@ -45,22 +46,24 @@ const checkIfAvail = (newVal, database) => {
 const addUser = (newUser, database) => {
   const newUserId = randomString();
   newUser.id = newUserId;
-  userDatabase[newUserId] = newUser;
+  newUser.password = bcrypt.hashSync(newUser.password, 10);
+  database[newUserId] = newUser;
   return newUser;
 }
 
 const fetchUserInfo = (email, database) => {
   for (let key in database) {
-    if (database[key]['email-address'] === email) {
+    if (database[key].email === email) {
       return database[key];
     }
   }
+  return undefined;
 };
 
 const currentUser = (cookie, database) => {
   for (let ids in database) {
     if (cookie === ids) {
-      return database[ids]['email-address'];
+      return database[ids].email;
     }
   }
 };
@@ -78,7 +81,7 @@ const urlsForUser = (id, database) => {
 };
 
 const checkOwner = (userId, urlID, database) => {
-  return userId === database[urlID].userID
+  return userId === database[urlID].userID;
 }
 
 module.exports = {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner};
