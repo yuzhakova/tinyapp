@@ -4,6 +4,7 @@ const PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookie = require('cookie-parser');
 const morgan = require('morgan');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', "ejs");
 app.use(cookie());
@@ -14,15 +15,16 @@ const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, curre
 const urlDatabase = {
   "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "nat123"},
   "9sm5xK": {longURL: "http://www.google.com", userID: "nat123"
-};
+}
+
 //store user as key object
 const userDatabase = {
-  "nat123": {id: "nat123", "email-address": "natalia.yuzhakova@com", password: "nat123"}
-};
+  "nat123": {id: "nat123", "email-address": "natalia.yuzhakova@com", password: "nat123"},
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
-});
+})
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
