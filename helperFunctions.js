@@ -33,13 +33,13 @@ const randomString = () => {
 
 //helpfer function: to check if emails are registered
 const checkIfAvail = (newVal, database) => {
-  for (user in database) {
+  for (let user in database) {
     if (database[user]['email-address'] === newVal) {
       return false;
     }
   }
   return true;
-}
+};
 
 //helper function: add user if available
 const addUser = (newUser, database) => {
@@ -50,13 +50,31 @@ const addUser = (newUser, database) => {
 }
 
 const fetchUserInfo = (email, database) => {
-  for (key in database) {
+  for (let key in database) {
     if (database[key]['email-address'] === email) {
-      return database[key]
+      return database[key];
     }
   }
-}
+};
+
+const currentUser = (cookie, database) => {
+  for (let ids in database) {
+    if (cookie === ids) {
+      return database[ids]['email-address'];
+    }
+  }
+};
+
+const urlsForUser = (id, database) => {
+  let currentUserId = id;
+  let usersURLs = {};
+  for (let key in database) {
+    if (database[key].userID === currentUserId) {
+      usersURLs[key] = database[key];
+    }
+  }
+  return usersURLs;
+};
 
 
-
-module.exports = { verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo } 
+module.exports = { verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser };
