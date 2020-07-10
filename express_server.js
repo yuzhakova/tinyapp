@@ -18,13 +18,10 @@ app.set('view engine', 'ejs');
 const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner} = require('./helperFunctions');
 
 const urlDatabase = {
-  // 'b2xVn2': {longURL: 'http://www.lighthouselabs.ca', userID: 'nat123'},
-  // '9sm5xK': {longURL: 'http://www.google.com', userID: 'nat123'
 };
 
-//store user as key object
 const userDatabase = {
-  // 'abcd': {id: 'abcd', 'email': 'john@stamos.com', password: '1234'},
+  'abcd': {id: 'abcd', 'email': 'john@stamos.com', password: '1234'},
 };
 
 app.get('/', (req, res) => {
@@ -40,7 +37,6 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-// registration form
 app.get('/register', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (user) {
@@ -76,7 +72,6 @@ app.get('/login', (req, res) => {
   }
 });
 
-//Create helper function to verify that the email and pwd match database
 app.post('/login', (req, res) => {
   const emailUsed = req.body['email'];
   const pwdUsed = req.body['password'];
@@ -93,7 +88,6 @@ app.post('/login', (req, res) => {
   }
 });
 
-// all urls are displayed on the main page
 app.get('/urls', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
@@ -105,7 +99,6 @@ app.get('/urls', (req, res) => {
   }
 });
 
-//this is to add new url to all urls page
 app.post('/urls', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
@@ -118,7 +111,6 @@ app.post('/urls', (req, res) => {
   }
 });
 
-// new url key is created
 app.get('/urls/new', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
@@ -129,7 +121,6 @@ app.get('/urls/new', (req, res) => {
   }
 });
 
-// new page is shown
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const user = currentUser(req.session.userId, userDatabase);
@@ -146,7 +137,6 @@ app.get('/urls/:shortURL', (req, res) => {
   }
 });
 
-// redirect to longURL
 app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if (verifyShortUrl(shortURL, urlDatabase)) {
@@ -157,7 +147,6 @@ app.get('/u/:shortURL', (req, res) => {
   }
 });
 
-//this is to delete url
 app.post('/urls/:shortURL/delete', (req, res) => {
   if (!checkOwner(currentUser(req.session.userId, userDatabase), req.params.shortURL, urlDatabase)) {
     res.send('This id does not belong to you');
@@ -167,7 +156,6 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
 });
 
-//this is to edit
 app.post('/urls/:shortURL/edit', (req, res) => {
   if (!checkOwner(currentUser(req.session.userId, userDatabase), req.params.shortURL, urlDatabase)) {
     res.send('This id does not belong to you');
@@ -177,8 +165,6 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   }
 });
 
-
-// endpoint to logout
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/urls');

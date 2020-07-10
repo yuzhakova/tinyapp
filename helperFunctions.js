@@ -23,7 +23,6 @@ const generateRandomString = () => {
   return alphaNumeric[index];
 };
 
-
 const randomString = () => {
   let randomString = '';
   while (randomString.length < 6) {
@@ -32,7 +31,7 @@ const randomString = () => {
   return randomString;
 };
 
-//helpfer function: to check if emails are registered
+// checking if email is registered
 const checkIfAvail = (newVal, database) => {
   for (let user in database) {
     if (database[user].email === newVal) {
@@ -42,7 +41,7 @@ const checkIfAvail = (newVal, database) => {
   return true;
 };
 
-//helper function: add user if available
+// checking if user is available
 const addUser = (newUser, database) => {
   const newUserId = randomString();
   newUser.id = newUserId;
@@ -68,7 +67,7 @@ const currentUser = (cookie, database) => {
   }
 };
 
-//this is to return url where the userID is equal to the id of current user
+//this is to return url where user id is equal to the id of current user
 const urlsForUser = (id, database) => {
   let currentUserId = id;
   let usersURLs = {};
