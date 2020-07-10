@@ -27,7 +27,7 @@ const generateRandomString = () => {
 const randomString = () => {
   let randomString = '';
   while (randomString.length < 6) {
-    randomString += generateRandomString;
+    randomString += generateRandomString();
   }
   return randomString;
 };

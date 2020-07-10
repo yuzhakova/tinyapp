@@ -1,55 +1,57 @@
-const express = require("express");
-const app = express();
-const PORT = process.env.PORT || 8080; // default port 8080
-const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session');
+const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(morgan('dev'));
-app.set('view engine', "ejs");
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieSession({
   name: 'session',
   keys: ['userId']
 }));
+app.use(morgan('dev'));
+app.set('view engine', 'ejs');
 
 const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner} = require('./helperFunctions');
 
 const urlDatabase = {
-  // "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "nat123"},
-  // "9sm5xK": {longURL: "http://www.google.com", userID: "nat123"
+  // 'b2xVn2': {longURL: 'http://www.lighthouselabs.ca', userID: 'nat123'},
+  // '9sm5xK': {longURL: 'http://www.google.com', userID: 'nat123'
 };
 
 //store user as key object
 const userDatabase = {
-  // "abcd": {id: "abcd", "email": "john@stamos.com", password: "1234"},
+  // 'abcd': {id: 'abcd', 'email': 'john@stamos.com', password: '1234'},
 };
 
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
-    res.redirect("/login");
+    res.redirect('/login');
   } else {
-    res.redirect("/urls");
+    res.redirect('/urls');
   }
 });
 
-app.get("/urls.json", (req, res) => {
+app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
 // registration form
-app.get("/register", (req, res) => {
+app.get('/register', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (user) {
     res.redirect('/urls');
   } else {
     let templateVars = { currentUser: user };
-    res.render("urls_register", templateVars);
+    res.render('urls_register', templateVars);
   }
 });
 
-app.post("/register", (req, res) => {
+app.post('/register', (req, res) => {
   const {email, password} = req.body;
   if (email === '') {
     res.status(400).send('Email is required');
@@ -64,18 +66,18 @@ app.post("/register", (req, res) => {
   }
 });
 
-app.get("/login", (req, res) => {
+app.get('/login', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (user) {
-    res.redirect("/urls");
+    res.redirect('/urls');
   } else {
     let templateVars = { currentUser: user };
-    res.render("login", templateVars);
+    res.render('login', templateVars);
   }
 });
 
 //Create helper function to verify that the email and pwd match database
-app.post("/login", (req, res) => {
+app.post('/login', (req, res) => {
   const emailUsed = req.body['email'];
   const pwdUsed = req.body['password'];
   if (fetchUserInfo(emailUsed, userDatabase)) {
@@ -92,22 +94,22 @@ app.post("/login", (req, res) => {
 });
 
 // all urls are displayed on the main page
-app.get("/urls", (req, res) => {
+app.get('/urls', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
-    res.render("urls_errors");
+    res.render('urls_errors');
   } else {
     const usersLinks = urlsForUser(user, urlDatabase);
     let templateVars = { urls: usersLinks, currentUser: currentUser(req.session.userId, userDatabase) };
-    res.render("urls_index", templateVars);
+    res.render('urls_index', templateVars);
   }
 });
 
 //this is to add new url to all urls page
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
-    res.redirect("/login");
+    res.redirect('/login');
   } else {
     const shortURL = randomString();
     const newURL = req.body.longURL;
@@ -117,18 +119,18 @@ app.post("/urls", (req, res) => {
 });
 
 // new url key is created
-app.get("/urls/new", (req, res) => {
+app.get('/urls/new', (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
     res.redirect('/login');
   } else {
     let templateVars = { currentUser: user };
-    res.render("urls_new", templateVars);
+    res.render('urls_new', templateVars);
   }
 });
 
 // new page is shown
-app.get("/urls/:shortURL", (req, res) => {
+app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const user = currentUser(req.session.userId, userDatabase);
   if (verifyShortUrl(shortURL, urlDatabase)) {
@@ -137,7 +139,7 @@ app.get("/urls/:shortURL", (req, res) => {
     } else {
       const longURL = urlDatabase[shortURL].longURL;
       let templateVars = { shortURL: shortURL, longURL: longURL, currentUser: user};
-      res.render("urls_show", templateVars);
+      res.render('urls_show', templateVars);
     }
   } else {
     res.send('This url does not exist');
@@ -145,7 +147,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // redirect to longURL
-app.get("/u/:shortURL", (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if (verifyShortUrl(shortURL, urlDatabase)) {
     const longURL = urlDatabase[shortURL].longURL;
@@ -156,7 +158,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //this is to delete url
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.post('/urls/:shortURL/delete', (req, res) => {
   if (!checkOwner(currentUser(req.session.userId, userDatabase), req.params.shortURL, urlDatabase)) {
     res.send('This id does not belong to you');
   } else {
@@ -166,7 +168,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 //this is to edit
-app.post("/urls/:shortURL/edit", (req, res) => {
+app.post('/urls/:shortURL/edit', (req, res) => {
   if (!checkOwner(currentUser(req.session.userId, userDatabase), req.params.shortURL, urlDatabase)) {
     res.send('This id does not belong to you');
   } else {
@@ -177,7 +179,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 
 
 // endpoint to logout
-app.post("/logout", (req, res) => {
+app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/urls');
 });
