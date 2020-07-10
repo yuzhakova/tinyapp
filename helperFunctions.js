@@ -27,7 +27,7 @@ const generateRandomString = () => {
 const randomString = () => {
   let randomString = '';
   while (randomString.length < 6) {
-    randomString += generateRandomString
+    randomString += generateRandomString;
   }
   return randomString;
 };
@@ -49,7 +49,7 @@ const addUser = (newUser, database) => {
   newUser.password = bcrypt.hashSync(newUser.password, 10);
   database[newUserId] = newUser;
   return newUser;
-}
+};
 
 const fetchUserInfo = (email, database) => {
   for (let key in database) {
@@ -82,6 +82,6 @@ const urlsForUser = (id, database) => {
 
 const checkOwner = (userId, urlID, database) => {
   return userId === database[urlID].userID;
-}
+};
 
 module.exports = {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, currentUser, urlsForUser, checkOwner};

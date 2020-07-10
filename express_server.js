@@ -18,7 +18,7 @@ const {verifyShortUrl, randomString, checkIfAvail, addUser, fetchUserInfo, curre
 const urlDatabase = {
   // "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "nat123"},
   // "9sm5xK": {longURL: "http://www.google.com", userID: "nat123"
-}
+};
 
 //store user as key object
 const userDatabase = {
@@ -58,11 +58,11 @@ app.post("/register", (req, res) => {
   } else if (!checkIfAvail(email, userDatabase)) {
     res.status(400).send('This email is already registered');
   } else {
-  const newUser = addUser(req.body, userDatabase)
-  req.session.userId = newUser.id;
-  res.redirect('/urls');
+    const newUser = addUser(req.body, userDatabase);
+    req.session.userId = newUser.id;
+    res.redirect('/urls');
   }
-})
+});
 
 app.get("/login", (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
@@ -76,18 +76,18 @@ app.get("/login", (req, res) => {
 
 //Create helper function to verify that the email and pwd match database
 app.post("/login", (req, res) => {
-  const emailUsed = req.body['email-address'];
+  const emailUsed = req.body['email'];
   const pwdUsed = req.body['password'];
   if (fetchUserInfo(emailUsed, userDatabase)) {
     const { password, id } = fetchUserInfo(emailUsed, userDatabase);
     if (!bcrypt.compareSync(pwdUsed, password)) {
-      res.status(403).send('Error 403... re-enter your password')
+      res.status(403).send('Error 403... re-enter your password');
     } else {
       req.session.userId = id;
       res.redirect('/urls');
     }
   } else {
-    res.status(403).send('Error 403... email not found')
+    res.status(403).send('Error 403... email not found');
   }
 });
 
@@ -96,10 +96,10 @@ app.get("/urls", (req, res) => {
   const user = currentUser(req.session.userId, userDatabase);
   if (!user) {
     res.render("urls_errors");
-    } else {
-      const usersLinks = urlsForUser(user, urlDatabase);
-      let templateVars = { urls: usersLinks, currentUser: currentUser(req.session.userId, userDatabase) };
-      res.render("urls_index", templateVars);
+  } else {
+    const usersLinks = urlsForUser(user, urlDatabase);
+    let templateVars = { urls: usersLinks, currentUser: currentUser(req.session.userId, userDatabase) };
+    res.render("urls_index", templateVars);
   }
 });
 
@@ -134,14 +134,14 @@ app.get("/urls/:shortURL", (req, res) => {
   if (verifyShortUrl(shortURL, urlDatabase)) {
     if (user !== urlDatabase[shortURL].userID) {
       res.send('This id does not belong to you');
+    } else {
+      const longURL = urlDatabase[shortURL].longURL;
+      let templateVars = { shortURL: shortURL, longURL: longURL, currentUser: user};
+      res.render("urls_show", templateVars);
+    }
   } else {
-    const longURL = urlDatabase[shortURL].longURL;
-    let templateVars = { shortURL: shortURL, longURL: longURL, currentUser: user};
-    res.render("urls_show", templateVars);
+    res.send('This url does not exist');
   }
-} else {
-  res.send('This url does not exist');
-  }  
 });
 
 // redirect to longURL
@@ -172,7 +172,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   } else {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect('/urls');
-    }
+  }
 });
 
 
